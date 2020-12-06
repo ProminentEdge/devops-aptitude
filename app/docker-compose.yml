@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+
+  app:
+    container_name: app
+    image: interview:latest
+    ports:
+      - 8080:5000
+    networks:
+      interview-network:
+        aliases:
+          - flask-app
+    environment:
+      - FLASK_APP=app.py
+    restart: unless-stopped
+    command: flask run --host=0.0.0.0
+
+  nginx:
+    image: nginx:1.18.0
+    container_name: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - app
+    networks:
+      - interview-network
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+networks:
+  interview-network:

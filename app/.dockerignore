@@ -1,0 +1,16 @@
+.env*
+*-compose*.yml
+*.md
+Dockerfile*
+.dockerignore
+*.swp
+.git
+.gitignore
+.editorconfig
+Makefile
+*.example
+venv
+.local.export
+VERSION
+*.DS_Store
+*.pyc
