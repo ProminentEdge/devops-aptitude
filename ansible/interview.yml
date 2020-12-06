@@ -1,0 +1,77 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Install required system packages
+      apt:
+        name: "{{ item }}"
+        state: latest
+        update_cache: yes
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - python3-pip
+        - virtualenv
+        - python3-setuptools
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Verify that we have the key with the fingerprint
+      apt_key:
+        id: 0EBFCD88
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+        update_cache: yes
+
+    - name: Update apt and install docker-ce
+      apt:
+        update_cache: yes
+        name: docker-ce
+        state: latest
+        update_cache: yes
+
+    - name: Add remote "ubuntu" user to "docker" group
+      remote_user: ubuntu
+      user:
+        name: "ubuntu"
+        group: "docker"
+        append: yes
+
+    - name: Install docker-compose
+      remote_user: ubuntu
+      get_url:
+        url : https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 'u+x,g+x'
+
+    - name: Download aws cli v2
+      remote_user: ubuntu
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /etc/awscliv2.zip
+
+    - name: Unzip aws cli
+      unarchive:
+        src: /etc/awscliv2.zip
+        dest: /etc/
+
+    - name: Install aws cli
+      become: yes
+      command: /etc/aws/install -i /usr/local/aws-cli -b /usr/local/bin
+
+    - name: Install jq
+      remote_user: ubuntu
+      get_url:
+        url: https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+        dest: /usr/local/bin/jq
+        mode: 'u+x,g+x'
+
